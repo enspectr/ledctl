@@ -206,6 +206,9 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOF_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
 
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(nLED_GPIO_Port, nLED_Pin, GPIO_PIN_SET);
+
   /*Configure GPIO pins : PB7 PB8 PB9 PB0 
                            PB1 PB2 PB3 PB4 
                            PB5 PB6 */
@@ -229,12 +232,19 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_Init(GPIOF, &GPIO_InitStruct);
 
   /*Configure GPIO pins : PA0 PA1 PA2 PA3 
-                           PA4 PA5 PA12 PA15 */
+                           PA5 PA12 PA15 */
   GPIO_InitStruct.Pin = GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3 
-                          |GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_12|GPIO_PIN_15;
+                          |GPIO_PIN_5|GPIO_PIN_12|GPIO_PIN_15;
   GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : nLED_Pin */
+  GPIO_InitStruct.Pin = nLED_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_OD;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(nLED_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pins : ENC_A_Pin ENC_B_Pin ENC_BTN_Pin */
   GPIO_InitStruct.Pin = ENC_A_Pin|ENC_B_Pin|ENC_BTN_Pin;
