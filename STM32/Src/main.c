@@ -23,7 +23,10 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include <intrinsics.h>
+#include <stdbool.h>
+#include "debug.h"
+#include "util.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -270,6 +273,17 @@ void Error_Handler(void)
   /* USER CODE END Error_Handler_Debug */
 }
 
+void assertion_failed(const char* file, unsigned line)
+{
+  bool on = false;
+  for (;;) {
+    WRITE_PIN(nLED, on);
+    on = !on;
+    for (int i = 0; i < 400000; ++i)
+       __no_operation();
+  }
+}
+
 #ifdef  USE_FULL_ASSERT
 /**
   * @brief  Reports the name of the source file and the source line number
@@ -283,6 +297,7 @@ void assert_failed(uint8_t *file, uint32_t line)
   /* USER CODE BEGIN 6 */
   /* User can add his own implementation to report the file name and line number,
      tex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
+  assertion_failed((const char*)file, line);
   /* USER CODE END 6 */
 }
 #endif /* USE_FULL_ASSERT */
