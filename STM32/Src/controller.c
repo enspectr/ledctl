@@ -6,6 +6,9 @@
 #define PWM_TIM htim3
 #define CLK_TIM htim14
 
+#define PWM_MAX 256
+#define PWM_OFF 0
+
 static uint32_t ctl_clock;
 
 static void ctl_poll(void)
@@ -24,9 +27,9 @@ void HAL_TIM_ErrorCallback(TIM_HandleTypeDef *htim)
 	BUG();
 }
 
-static inline void ctl_set_pwm(uint8_t val)
+static inline void ctl_set_pwm(uint16_t val)
 {
-	PWM_TIM.Instance->CCR1 = val + 1;
+	PWM_TIM.Instance->CCR1 = val;
 }
 
 void ctl_init(void)
