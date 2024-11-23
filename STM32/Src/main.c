@@ -27,6 +27,7 @@
 #include <stdbool.h>
 #include "debug.h"
 #include "util.h"
+#include "controller.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -45,6 +46,7 @@
 
 /* Private variables ---------------------------------------------------------*/
 TIM_HandleTypeDef htim3;
+TIM_HandleTypeDef htim14;
 
 /* USER CODE BEGIN PV */
 
@@ -54,13 +56,17 @@ TIM_HandleTypeDef htim3;
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_TIM3_Init(void);
+static void MX_TIM14_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
+static inline void do_idle(void)
+{
+  __WFI();
+}
 /* USER CODE END 0 */
 
 /**
@@ -93,8 +99,9 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_TIM3_Init();
+  MX_TIM14_Init();
   /* USER CODE BEGIN 2 */
-
+  ctl_init();
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -104,6 +111,8 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+    ctl_run();
+    do_idle();
   }
   /* USER CODE END 3 */
 }
@@ -195,6 +204,37 @@ static void MX_TIM3_Init(void)
 }
 
 /**
+  * @brief TIM14 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM14_Init(void)
+{
+
+  /* USER CODE BEGIN TIM14_Init 0 */
+
+  /* USER CODE END TIM14_Init 0 */
+
+  /* USER CODE BEGIN TIM14_Init 1 */
+
+  /* USER CODE END TIM14_Init 1 */
+  htim14.Instance = TIM14;
+  htim14.Init.Prescaler = 15;
+  htim14.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim14.Init.Period = 499;
+  htim14.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim14.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim14) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM14_Init 2 */
+
+  /* USER CODE END TIM14_Init 2 */
+
+}
+
+/**
   * @brief GPIO Initialization Function
   * @param None
   * @retval None
@@ -258,7 +298,16 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-
+void assertion_failed(const char* file, unsigned line)
+{
+  bool on = false;
+  for (;;) {
+    WRITE_PIN(nLED, on);
+    on = !on;
+    for (int i = 0; i < 300000; ++i)
+      __no_operation();
+  }
+}
 /* USER CODE END 4 */
 
 /**
@@ -269,19 +318,8 @@ void Error_Handler(void)
 {
   /* USER CODE BEGIN Error_Handler_Debug */
   /* User can add his own implementation to report the HAL error return state */
-
+  BUG();
   /* USER CODE END Error_Handler_Debug */
-}
-
-void assertion_failed(const char* file, unsigned line)
-{
-  bool on = false;
-  for (;;) {
-    WRITE_PIN(nLED, on);
-    on = !on;
-    for (int i = 0; i < 400000; ++i)
-       __no_operation();
-  }
 }
 
 #ifdef  USE_FULL_ASSERT
