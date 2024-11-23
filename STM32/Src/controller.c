@@ -24,9 +24,16 @@ void HAL_TIM_ErrorCallback(TIM_HandleTypeDef *htim)
 	BUG();
 }
 
+static inline void ctl_set_pwm(uint8_t val)
+{
+	PWM_TIM.Instance->CCR1 = val + 1;
+}
+
 void ctl_init(void)
 {
 	HAL_StatusTypeDef rc = HAL_TIM_Base_Start_IT(&CLK_TIM);
+	BUG_ON(rc != HAL_OK);
+	rc = HAL_TIM_PWM_Start(&PWM_TIM, TIM_CHANNEL_1);
 	BUG_ON(rc != HAL_OK);
 }
 
