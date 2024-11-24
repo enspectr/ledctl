@@ -11,8 +11,7 @@
 
 #define PWM_MAX 256
 #define ENC_HIST_LEN 4
-#define BOOST_THRESOLD 4
-#define BOOST_MUL 8
+#define BOOST_MAX 16
 
 static struct control ctl_btn;
 static struct qenc    ctl_enc;
@@ -71,21 +70,20 @@ static void ctl_process(void)
 		break;
 	}
 
+	int16_t boost = 1;
+	for (int i = 0; i < ENC_HIST_LEN; ++i)
+		boost += ctl_enc_hist[i];
+	if (boost > BOOST_MAX)
+		boost = BOOST_MAX;
+
 	int16_t const pos = qenc_pos(&ctl_enc);
 	int16_t delta = pos - ctl_last_pos;
-	ctl_enc_hist[ctl_sn % ENC_HIST_LEN] = delta;
+	ctl_enc_hist[ctl_sn % ENC_HIST_LEN] = delta >= 0 ? delta : -delta;
 	ctl_last_pos = pos;
 	if (!ctl_on || !delta)
 		return;
 
-	int16_t hdelta = 0;
-	for (int i = 0; i < ENC_HIST_LEN; ++i)
-		hdelta += ctl_enc_hist[i];
-#ifdef BOOST_MUL
-	if (hdelta <= -BOOST_THRESOLD || BOOST_THRESOLD <= hdelta)
-		delta *= BOOST_MUL;
-#endif
-	int new_pwm = ctl_pwm + delta;
+	int new_pwm = ctl_pwm + delta * boost;
 	if (new_pwm < 0)
 		new_pwm = 0;
 	if (new_pwm > PWM_MAX)
