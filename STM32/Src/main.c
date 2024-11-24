@@ -310,7 +310,7 @@ void assertion_failed(const char* file, unsigned line)
   for (;;) {
     WRITE_PIN(nLED, on);
     on = !on;
-    for (int i = 0; i < 300000; ++i)
+    for (int i = 0; i < 2000000; ++i)
       __no_operation();
   }
 }
