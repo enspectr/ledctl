@@ -68,12 +68,17 @@ static inline void ctl_set_pwm(uint16_t val)
 
 void ctl_init(void)
 {
-	HAL_StatusTypeDef rc = HAL_TIM_Base_Start_IT(&CLK_TIM);
-	BUG_ON(rc != HAL_OK);
-	rc = HAL_TIM_PWM_Start(&PWM_TIM, TIM_CHANNEL_1);
+	HAL_StatusTypeDef rc = HAL_TIM_PWM_Start(&PWM_TIM, TIM_CHANNEL_1);
 	BUG_ON(rc != HAL_OK);
 	cfg_init(cfg_config_valid, sizeof(ctl_cfg), &ctl_cfg);
 	ctl_pwm = ctl_pwm_saved = ctl_cfg.pwm;
+	for (uint16_t pwm = PWM_MAX; pwm > 0; pwm >>= 1) {
+		ctl_set_pwm(pwm);
+		HAL_Delay(40);
+	}
+	ctl_set_pwm(0);
+	rc = HAL_TIM_Base_Start_IT(&CLK_TIM);
+	BUG_ON(rc != HAL_OK);
 }
 
 // Called every 128 msec
